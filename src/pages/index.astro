@@ -1,7 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
-
 ---
 
 <Layout title="Globos Sexo | Official Website">
@@ -164,55 +162,190 @@ import Layout from "../layouts/Layout.astro";
     width: 100%;
   }
 
-  @media screen and (max-width: 768px){
+  @media screen and (max-width: 768px) {
     .landing {
       flex-direction: column;
     }
     .icon_separator {
-     rotate: 90deg;
+      rotate: 90deg;
     }
-    
+  }
+</style>
+<style>
+  main {
+    height: 100vh;
+  }
+  .landing {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-evenly;
+    height: 95%;
+  }
+  .tip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 5%;
+    color: var(--border-color);
+    text-align: center;
+    width: 100%;
+  }
+  .file-upload-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--component-background);
+    border: 1px solid var(--border-color);
+    border-radius: 0.3rem;
+    height: 230px;
+    width: 250px;
+  }
+  .file-upload-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+  .file-upload-design {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .file-upload-design svg {
+    width: 34px;
+    height: 34px;
+  }
+  .file-upload-design p {
+    margin: 0;
+    color: #cfcfcf;
+  }
+  .browse-button {
+    background-color: var(--component-background);
+    border: 1px solid var(--border-color);
+    border-radius: 0.3rem;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    transition: 300ms;
+    color: #cfcfcf;
+    cursor: pointer;
+  }
+  .browse-button:hover {
+    background-color: #141414fb;
+  }
+  .file-upload-label input {
+    display: none;
+  }
+  .bubble-output {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 230px;
+    width: 250px;
+  }
+  .bubble-output img {
+    border-radius: 5%;
+    object-fit: contain;
+    height: 100%;
+    width: 100%;
+  }
+  @media screen and (max-width: 768px) {
+    .landing {
+      flex-direction: column;
+    }
+    .icon_separator {
+      rotate: 90deg;
+    }
   }
 </style>
 <script>
-  import { createCanvas, loadImage } from 'canvas';
+  import { createCanvas, loadImage } from "canvas";
 
-  const fileInput = document.getElementById('file');
-  const bubbleOutput = document.querySelector('.bubble-output img');
+const fileInput = document.getElementById("file");
+const bubbleOutput = document.querySelector(".bubble-output img");
 
-  fileInput?.addEventListener('change', async (e) => {
-    const file = (e.target as HTMLInputElement)?.files?.[0];
+fileInput?.addEventListener("change", async (e) => {
+  const file = (e?.target as HTMLInputElement)?.files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      if (e?.target?.result) {
+        await processImage(e.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+bubbleOutput?.addEventListener("click", (e) => {
+  const src = (e?.target as HTMLImageElement)?.src;
+  if (src) {
+    const a = document.createElement("a");
+    a.href = src;
+    a.download = "bubble.png";
+    a.click();
+  }
+});
+
+document.addEventListener("paste", (e) => {
+  const items = e?.clipboardData?.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.includes("image")) {
+      const blob = items[i].getAsFile();
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        if (e?.target?.result) {
+          await processImage(e.target.result);
+        }
+      };
+      if (blob) {
+        reader.readAsDataURL(blob);
+      }
+      break;
+    }
+  }
+});
+
+const form = document.querySelector(".file-upload-form");
+if (form) {
+  form.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+  form.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const file = (e as DragEvent)?.dataTransfer?.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        if (e.target?.result) {
+        if (e?.target?.result) {
           await processImage(e.target.result);
         }
       };
       reader.readAsDataURL(file);
     }
   });
+}
 
-  bubbleOutput?.addEventListener('click', (e) => {
-    const src = (e.target as HTMLImageElement)?.src;
-    if (src) {
-      const a = document.createElement('a');
-      a.href = src;
-      a.download = 'bubble.png';
-      a.click();
-    }
-  });
+const processImage = async (imageData: string | ArrayBuffer) => {
+  const image = await loadImage(imageData);
+  const overlay = await loadImage("./Bubble.svg");
+  const overlayHeight = image.height * 0.3;
+  const canvas = createCanvas(image.width, image.height);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(image, 0, 0, image.width, image.height);
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.drawImage(overlay, 0, 0, image.width, overlayHeight);
+  bubbleOutput?.setAttribute("src", canvas.toDataURL());
+  return canvas.toDataURL();
+};
 
-  const processImage = async (imageData: string | ArrayBuffer) => {
-    const image = await loadImage(imageData);
-    const overlay = await loadImage('./Bubble.svg');
-    const overlayHeight = image.height * 0.3;
-    const canvas = createCanvas(image.width, image.height);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(image, 0, 0, image.width, image.height);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.drawImage(overlay, 0, 0, image.width, overlayHeight);
-    bubbleOutput?.setAttribute('src', canvas.toDataURL());
-    return canvas.toDataURL();
-  };
 </script>
