@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createCanvas, loadImage } from 'canvas';
 
-export const GET: APIRoute = async ({ params, request }) => 
+export const GET: APIRoute = async ({ request }) => 
 {
   const urlParam = request.url.split('?url=')[1]; 
 
