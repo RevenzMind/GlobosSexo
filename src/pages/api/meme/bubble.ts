@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createCanvas, loadImage } from 'canvas';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
 
 export const GET: APIRoute = async ({ request }) => 
 {
@@ -17,14 +17,12 @@ export const GET: APIRoute = async ({ request }) =>
     ctx.globalCompositeOperation = 'destination-out';
     ctx.drawImage(overlay, 0, 0, image.width, overlayHeight);
 
-    const response = new Response(canvas.toBuffer(), {
+    return new Response(canvas.toBuffer('image/png'), {
       headers: {
         'Content-Type': 'image/png',
         'Content-Disposition': 'inline; filename="bubble.png"'
       },
     });
-
-    return response;
   } catch (error) {
     return new Response('Error processing image', { status: 500 });
   }
