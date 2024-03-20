@@ -269,60 +269,11 @@ import Layout from "../layouts/Layout.astro";
 <script>
   import { createCanvas, loadImage } from "canvas";
 
-const fileInput = document.getElementById("file");
-const bubbleOutput = document.querySelector(".bubble-output img");
+  const fileInput = document.getElementById("file");
+  const bubbleOutput = document.querySelector(".bubble-output img");
 
-fileInput?.addEventListener("change", async (e) => {
-  const file = (e?.target as HTMLInputElement)?.files?.[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      if (e?.target?.result) {
-        await processImage(e.target.result);
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-bubbleOutput?.addEventListener("click", (e) => {
-  const src = (e?.target as HTMLImageElement)?.src;
-  if (src) {
-    const a = document.createElement("a");
-    a.href = src;
-    a.download = "bubble.png";
-    a.click();
-  }
-});
-
-document.addEventListener("paste", (e) => {
-  const items = e?.clipboardData?.items;
-  if (!items) return;
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].type.includes("image")) {
-      const blob = items[i].getAsFile();
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        if (e?.target?.result) {
-          await processImage(e.target.result);
-        }
-      };
-      if (blob) {
-        reader.readAsDataURL(blob);
-      }
-      break;
-    }
-  }
-});
-
-const form = document.querySelector(".file-upload-form");
-if (form) {
-  form.addEventListener("dragover", (e) => {
-    e.preventDefault();
-  });
-  form.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const file = (e as DragEvent)?.dataTransfer?.files[0];
+  fileInput?.addEventListener("change", async (e) => {
+    const file = (e?.target as HTMLInputElement)?.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -333,19 +284,75 @@ if (form) {
       reader.readAsDataURL(file);
     }
   });
-}
 
-const processImage = async (imageData: string | ArrayBuffer) => {
-  const image = await loadImage(imageData);
-  const overlay = await loadImage("./Bubble.svg");
-  const overlayHeight = image.height * 0.3;
-  const canvas = createCanvas(image.width, image.height);
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(image, 0, 0, image.width, image.height);
-  ctx.globalCompositeOperation = "destination-out";
-  ctx.drawImage(overlay, 0, 0, image.width, overlayHeight);
-  bubbleOutput?.setAttribute("src", canvas.toDataURL());
-  return canvas.toDataURL();
-};
+  bubbleOutput?.addEventListener("click", (e) => {
+    const src = (e?.target as HTMLImageElement)?.src;
+    if (src) {
+      const a = document.createElement("a");
+      a.href = src;
+      a.download = "bubble.png";
+      a.click();
+    }
+  });
 
+  document.addEventListener("paste", (e) => {
+    const items = e?.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.includes("image")) {
+        const blob = items[i].getAsFile();
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          if (e?.target?.result) {
+            await processImage(e.target.result);
+          }
+        };
+        if (blob) {
+          reader.readAsDataURL(blob);
+        }
+        break;
+      }
+    }
+  });
+
+  const form = document.querySelector(".file-upload-form");
+  if (form) {
+    form.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    form.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const file = (e as DragEvent)?.dataTransfer?.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          if (e?.target?.result) {
+            await processImage(e.target.result);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  const processImage = async (imageData: string | ArrayBuffer) => {
+    fetch(
+      "api/meme/bubble?url=" +
+        "https://cdn.discordapp.com/attachments/1034247211174862868/1219835753597763584/image.png",
+      {
+        method: "GET",
+      }
+    );
+
+    const image = await loadImage(imageData);
+    const overlay = await loadImage("./Bubble.svg");
+    const overlayHeight = image.height * 0.3;
+    const canvas = createCanvas(image.width, image.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0, image.width, image.height);
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.drawImage(overlay, 0, 0, image.width, overlayHeight);
+    bubbleOutput?.setAttribute("src", canvas.toDataURL());
+    return canvas.toDataURL();
+  };
 </script>
